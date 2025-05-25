@@ -1,5 +1,5 @@
 const Tour = require('../models/tourModel');
-const User = require('../model/userModel');
+const User = require('../models/userModel');
 const Booking = require('../models/bookingModel');
 const catchAsync = require('../utils/catchAsync');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
