@@ -4,6 +4,13 @@ const AppError = require('../utils/appError');
 const Booking = require('../models/bookingModel');
 const catchAsync = require('../utils/catchAsync');
 
+exports.alerts = (req, res, next) => {
+  const { alert } = req.query;
+  if (alert === 'booking')
+    res.locals.alert =
+      "Your booking was successful! Please check your email for a confirmation. If yout booking doesn't show up here immediately, please come back later";
+  next();
+};
 exports.getOverview = catchAsync(async (req, res, next) => {
   // 1) Get all the tour data from collection
   const tours = await Tour.find();
@@ -26,7 +33,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
     return next(new AppError('There is no tour with that name', 404));
   }
   // 2) Build template
-  
+
   // 3) Render Template usiung th
   res.status(200).render('tour', {
     title: tour.name,
@@ -34,10 +41,10 @@ exports.getTour = catchAsync(async (req, res, next) => {
   });
 });
 exports.getMyTours = catchAsync(async (req, res, next) => {
-  // 1) Find all bookings   
+  // 1) Find all bookings
   const bookings = await Booking.find({ user: req.user.id });
   // 2) Find tours with the booked IDs
-  const tourIds = bookings.map(booking => booking.tour);
+  const tourIds = bookings.map((booking) => booking.tour);
   const tours = await Tour.find({ _id: { $in: tourIds } });
   // 3) Render the tours page with the tours
   res.status(200).render('overview', {
@@ -98,9 +105,9 @@ exports.getResetPasswordForm = (req, res) => {
 };
 
 exports.getForgotPassword = async (req, res, next) => {
-  return res.render('forgetPassword',{
+  return res.render('forgetPassword', {
     title: 'Forgot your password?',
-    message: 'Please provide your email address to receive a password reset link.',
+    message:
+      'Please provide your email address to receive a password reset link.',
   });
 };
-

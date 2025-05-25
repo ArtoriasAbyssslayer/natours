@@ -19,7 +19,7 @@ const bookingController = require('./controllers/bookingController');
 const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
-app.enable('trust proxy'); // For Heroku and other reverse proxies
+app.set('trust proxy', 1); // Trust only the first proxy// For Heroku and other reverse proxies
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
