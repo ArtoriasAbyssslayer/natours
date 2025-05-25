@@ -49,7 +49,19 @@ const connectSrcUrls = [
 ];
 const frameSrcUrls = ['https://js.stripe.com'];
 const fontSrcUrls = ['fonts.googleapis.com', 'fonts.gstatic.com'];
+// Implement CORS 
 app.use(cors());
+// Allow cross-origin requests
+// app.use(cors({ origin: 'https://example.com' })); // Replace with your frontend URL
+// Allow credentials for CORS
+// app.use(
+//   cors({
+//     origin: true, // Allow all origins or specify your frontend URL
+//     credentials: true, // Allow cookies to be sent
+//   }),
+// );
+app.options('*', cors()); // Pre-flight requests for all routes
+// app.options('/api/v1/tours/:id', cors()); // Pre-flight requests for specific routes
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
