@@ -15,6 +15,7 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
+const bookingController = require('./controllers/bookingController');
 const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
@@ -49,7 +50,7 @@ const connectSrcUrls = [
 ];
 const frameSrcUrls = ['https://js.stripe.com'];
 const fontSrcUrls = ['fonts.googleapis.com', 'fonts.gstatic.com'];
-// Implement CORS 
+// Implement CORS
 app.use(cors());
 // Allow cross-origin requests
 // app.use(cors({ origin: 'https://example.com' })); // Replace with your frontend URL
@@ -96,7 +97,12 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again in an hour!',
 });
 app.use('/api', limiter);
-
+// we need the body to not be json for the webhook (Raw-stream format)
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout,
+);
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));

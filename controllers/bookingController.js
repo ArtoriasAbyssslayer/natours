@@ -1,4 +1,5 @@
 const Tour = require('../models/tourModel');
+const User = require('../model/userModel');
 const Booking = require('../models/bookingModel');
 const catchAsync = require('../utils/catchAsync');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -19,7 +20,8 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // 2) Create checkout session
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
-    success_url: `${req.protocol}://${req.get('host')}/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price * 0.88}`,
+    // success_url: `${req.protocol}://${req.get('host')}/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price * 0.88}`,
+    success_url: `${req.protocol}://${req.get('host')}/my-tours`,
     // Using 0.88 to convert EUR to USD, adjust as necessary
     cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
     customer_email: req.user.email,
@@ -47,27 +49,39 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     session,
   });
 });
-
-exports.createBookingCheckout = catchAsync(async (req, res, next) => {
-  // This middleware is only used in development, not in production!
-  // unsecure everyone can create a booking by just visiting the URL with query params
-  const { tour, user, price } = req.query;
-  if (!tour && !user && !price) return next();
-  // Create a new booking in the database 
-  const booking = await Booking.create({
+const createBookingCheckout = catchAsync(async (session) => {
+  const tour = session.client_reference_id;
+  const user = (await User.findOne({ email: session.customer_email })).id;
+  const price = session.line_items.unit_amount / 100;
+  await Booking.create({
     tour,
     user,
     price,
   });
-  res.redirect(301,  req.originalUrl.split('?')[0]);
+});
+exports.webhookCheckout = catchAsync(async (req, res, next) => {
+  const signature = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET,
+    );
+  } catch (err) {
+    return res.status(400).send(`Webhook error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.complete') {
+    createBookingCheckout(event.data.object);
+  }
+  res.status(200).json({ received: true });
 });
 
 exports.getBookingsByUser = catchAsync(async (req, res, next) => {
-  const bookings = await Booking.find({ user: req.params.userId })
-    .populate({
-      path: 'tour',
-      select: 'name price',
-    });
+  const bookings = await Booking.find({ user: req.params.userId }).populate({
+    path: 'tour',
+    select: 'name price',
+  });
   res.status(200).json({
     status: 'success',
     data: {
@@ -76,11 +90,10 @@ exports.getBookingsByUser = catchAsync(async (req, res, next) => {
   });
 });
 exports.getBookingsByTour = catchAsync(async (req, res, next) => {
-  const bookings = await Booking.find({ tour: req.params.tourId })
-    .populate({
-      path: 'user',
-      select: 'name photo',
-    });
+  const bookings = await Booking.find({ tour: req.params.tourId }).populate({
+    path: 'user',
+    select: 'name photo',
+  });
   res.status(200).json({
     status: 'success',
     data: {
