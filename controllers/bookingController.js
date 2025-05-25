@@ -16,7 +16,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // 1) Get the currently booked tour
 
   const tour = await Tour.findById(req.params.tourId);
-  const price = Math.round(tour.price*0.88*100)
+  const price = Math.round(tour.price * 0.88 * 100);
   // 2) Create checkout session
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
@@ -33,7 +33,9 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
           product_data: {
             name: `${tour.name} Tour`,
             description: tour.summary,
-            images: [`${req.protocol}://${req.get('host')}/img/tours/${tour.imageCover}`],
+            images: [
+              `${req.protocol}://${req.get('host')}/img/tours/${tour.imageCover}`,
+            ],
           },
           unit_amount: price, // Convert to cents
         },
@@ -50,18 +52,25 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   });
 });
 const createBookingCheckout = catchAsync(async (session) => {
-  
   const tour = session.client_reference_id;
   const user = (await User.findOne({ email: session.customer_email })).id;
-  const priceInCents = session.line_items.data[0].price.unit_amount;
-  const price = priceInCents / 100; // convert cents to main currency unit
-
+  if (
+    session.line_items &&
+    session.line_items.data &&
+    session.line_items.data.length > 0
+  ) {
+    const priceInCents = session.line_items.data[0].price.unit_amount;
+    const price = priceInCents / 100;
+    console.log(`Price: ${price}`);
+  } else {
+    console.warn('Line items not available in session');
+    price=3000;
+  }
   await Booking.create({
     tour,
     user,
     price,
   });
-  
 });
 exports.webhookCheckout = (req, res, next) => {
   const signature = req.headers['stripe-signature'];
@@ -71,12 +80,12 @@ exports.webhookCheckout = (req, res, next) => {
     event = stripe.webhooks.constructEvent(
       req.body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET
+      process.env.STRIPE_WEBHOOK_SECRET,
     );
   } catch (err) {
     return res.status(400).send(`Webhook error: ${err.message}`);
   }
-  
+
   if (event.type === 'checkout.session.completed')
     createBookingCheckout(event.data.object);
 
