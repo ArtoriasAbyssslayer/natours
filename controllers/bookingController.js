@@ -53,7 +53,9 @@ const createBookingCheckout = catchAsync(async (session) => {
   
   const tour = session.client_reference_id;
   const user = (await User.findOne({ email: session.customer_email })).id;
-  const price = session.display_items.unit_amount / 100;
+  const priceInCents = session.line_items.data[0].price.unit_amount;
+  const price = priceInCents / 100; // convert cents to main currency unit
+
   await Booking.create({
     tour,
     user,
