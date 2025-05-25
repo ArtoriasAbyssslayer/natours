@@ -251,7 +251,7 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
       400,
     );
   }
-  console.log(distance, lat, lng, unit);
+  
 
   let filter = {
     startLocation: {

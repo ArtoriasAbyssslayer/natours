@@ -88,7 +88,6 @@ exports.getResetPasswordForm = (req, res) => {
   if (!res.locals.user) {
     // only if no user connected we can access to this page
     const token = req.params.token;
-    console.log(token);
     res.status(200).render('resetPassword', {
       title: 'Set your new password',
       token,

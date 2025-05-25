@@ -12,7 +12,7 @@
     "start:prod": "cross-env NODE_ENV=production nodemon server.js",
     "debug": "cross-env NODE_ENV=development ndb server.js",
     "watch:js": "parcel watch ./public/js/index.js --port 3000 --host 127.0.0.1 --dist-dir ./public/js/bundled --no-hmr",
-    "build:js": "parcel build ./public/js/index.js --dist-dir ./public/js/bundled --no-hmr"
+    "build:js": "parcel build ./public/js/index.js --dist-dir ./public/js/bundled"
   },
   "repository": {
     "type": "git",

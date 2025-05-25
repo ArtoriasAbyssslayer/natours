@@ -163,16 +163,6 @@ tourSchema.pre('save', function (next) {
 //   next();
 // });
 
-tourSchema.pre('save', function (next) {
-  console.log('Will save document...');
-  next();
-});
-// DOCUMENT MIDDLEWARE: runs after
-// post-save hook
-tourSchema.post('save', function (doc, next) {
-  //console.log(doc);
-  next();
-});
 
 // DOCUMENT MIDDLEWARE: QUERY MIDDLEWARE
 // hook 'find'
@@ -190,12 +180,7 @@ tourSchema.pre(/^find/, function (next) {
   });
   next();
 });
-// Post Query middleware , post hook /^find/
-tourSchema.post(/^find/, function (docs, next) {
-  //console.log(docs);
-  console.log(`Query took ${Date.now() - this.start} ms`);
-  next();
-});
+
 // Aggregation middleware before or after an aggregation happens
 tourSchema.pre('aggregate', function (next) {
   if (!this.pipeline()[0].$geoNear) {
@@ -203,7 +188,7 @@ tourSchema.pre('aggregate', function (next) {
       $match: { secretTour: { $ne: true } },
     });
   }
-  console.log(this.pipeline());
+  
   next();
 });
 

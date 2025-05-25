@@ -48,7 +48,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   const token = signToken(newUser._id);
 
   const url = `${req.protocol}://${req.get('host')}/me`;
-  console.log(url);
+  
   await new Email(newUser, url).sendWelcome();
   createSendToken(
     newUser,
@@ -118,7 +118,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     token = req.cookies.jwt;
   }
 
-  // console.log('Token Given: ' + token);
+
   if (!token) {
     res.redirect('/');
     // return next(
@@ -130,7 +130,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
   // 2) Token Verification
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  // console.log("Decoded token: " + JSON.stringify(decoded));
+  
   // 3) Check if the user still exists
   const currentUser = await User.findById(decoded.id).select('+confirmedEmail');
   if (!currentUser) {
@@ -176,7 +176,7 @@ exports.restrictTo = (...roles) => {
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get User based on posted email
-  console.log(req.body.email);
+  
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
     return next(new AppError('There is no user with this email address.', 404));
