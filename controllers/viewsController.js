@@ -98,10 +98,9 @@ exports.getResetPasswordForm = (req, res) => {
 };
 
 exports.getForgotPassword = async (req, res, next) => {
-  res.render('forgetPassword',{
+  return res.render('forgetPassword',{
     title: 'Forgot your password?',
     message: 'Please provide your email address to receive a password reset link.',
   });
-  next();
 };
 
