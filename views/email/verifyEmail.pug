@@ -1,0 +1,21 @@
+extends baseEmail
+
+block content
+    p Hi #{firstName},
+    | Hi! There, You have recently visited 
+    | our website and entered your email. 
+    | Please follow the given link to verify 
+    | your email address.
+    p
+      a(href="${url}")
+
+    table.btn.btn-primary(role='presentation', border='0', cellpadding='0', cellspacing='0')
+        tbody
+            tr
+                td(align='left')
+                    table(role='presentation', border='0', cellpadding='0', cellspacing='0')
+                        tbody
+                            tr
+                                td
+                                    a(href=`${url}`, target='_blank') Verify your Email
+    p If you didn't signup to our platform ignore this email 

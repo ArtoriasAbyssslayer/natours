@@ -1,0 +1,38 @@
+// create my reviews view
+extends base 
+
+block content
+  h1 My Reviews
+  ul
+    each review in reviews
+      li
+        h2= review.title
+        p= review.body
+        p Rating: #{review.rating}
+        p Tour: 
+          a(href=`/tours/${review.tour._id}`) #{review.tour.name}
+        p Date: #{new Date(review.createdAt).toLocaleDateString()}
+        p
+          a(href=`/reviews/${review._id}/edit`) Edit
+          | 
+          a(href=`/reviews/${review._id}/delete`) Delete
+        hr
+    p
+        a(href='/reviews/new') Add a new review
+    p
+        a(href='/my-tours') Back to My Tours
+    p
+        a(href='/me') Back to My Account
+  if reviews.length === 0  
+    p No reviews found. Why not add one?
+  else
+    p Total reviews: #{reviews.length}
+    p Average rating: #{reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length}
+    p Highest rating: #{Math.max(...reviews.map(review => review.rating))}
+    p Lowest rating: #{Math.min(...reviews.map(review => review.rating))}
+    p
+      a(href='/reviews/new') Add a new review
+    p
+      a(href='/my-tours') Back to My Tours
+    p
+      a(href='/me') Back to My Account
